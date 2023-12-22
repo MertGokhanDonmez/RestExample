@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RestExample.Controllers;
 
+// shop entity decleration
 public class Shop
 {
     [Required]
@@ -20,6 +21,7 @@ public class Shop
     public int NumberOfEmployees { get; set; }
 }
 
+// Created custom validation for is shop SME or not
 public class EmployeeRangeForBusinessSize : ValidationAttribute
 {
     public int _maxEmployees;
@@ -40,6 +42,7 @@ public class EmployeeRangeForBusinessSize : ValidationAttribute
     }
 }
 
+// Api methods
 [ApiController]
 [Route("api/shops")]
 public class ShopController : ControllerBase
@@ -51,11 +54,13 @@ public class ShopController : ControllerBase
         new Shop {ID = "4" ,ShopName = "Tuylu Petshop",ShopAddress = "Afyonkarahisar/Bolvadin",NumberOfEmployees = 3 }
     };
 
+    // constructor
     public ShopController()
     {
 
     }
 
+    //Create shop
     [HttpPost]
     public Shop Post([FromBody] Shop value)
     {
@@ -63,8 +68,9 @@ public class ShopController : ControllerBase
         return value;
     }
 
+    // get all shops
     [HttpGet]
-    public IActionResult Get()
+    public IActionResult GetAllShops()
     {
         try
         {
@@ -76,8 +82,9 @@ public class ShopController : ControllerBase
         }
     }
 
+    //Get shops by name
     [HttpGet("{name}")]
-    public IActionResult Get(string name)
+    public IActionResult GetShopsByName(string name)
     {
         try
         {
@@ -97,24 +104,28 @@ public class ShopController : ControllerBase
         }
     }
 
+    //get shops by employees using fromquery
     [HttpGet("get-query")]
     public Shop GetQuery([FromQuery] int? numberOfEmployees)
     {
         return shops.FirstOrDefault(p => p.NumberOfEmployees == numberOfEmployees);
     }
 
+    //get shops by employees using fromroute
     [HttpGet("get-route/{numberOfEmployees}")]
     public Shop GetRoute(int? numberOfEmployees)
     {
         return shops.FirstOrDefault(p => p.NumberOfEmployees == numberOfEmployees);
     }
 
+    //get shops by employees using fromquery and fromroute
     [HttpGet("get-route-query/{shopAddress}")]
     public Shop GetRouteAndQuery([FromRoute] string shopAddress, [FromQuery] int? numberOfEmployees)
     {
         return shops.FirstOrDefault(p => p.ShopAddress == shopAddress & p.NumberOfEmployees == numberOfEmployees);
     }
 
+    //update shop name by id
     [HttpPatch("{id}")]
     public IActionResult UpdateShopName(string id, string name)
     {
@@ -138,6 +149,7 @@ public class ShopController : ControllerBase
 
     }
 
+    //update shop name and numberOfEmployees by id
     [HttpPut("{id}")]
     public IActionResult UpdateShop(string id, string name, int numberOfEmployees)
     {
@@ -162,6 +174,7 @@ public class ShopController : ControllerBase
 
     }
 
+    //Delete shop by id
     [HttpDelete("{id}")]
     public IActionResult DeleteShop([FromRoute] string id)
     {
