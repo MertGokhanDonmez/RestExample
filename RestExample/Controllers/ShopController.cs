@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System.Net;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RestExample.Controllers;
 
 public class Shop
 {
+    [Required]
+    public string ID { get; set; }
     [Required]
     [StringLength(maximumLength: 250, MinimumLength = 10, ErrorMessage = "Shop Name Invalid")]
     public string ShopName { get; set; }
@@ -20,7 +22,6 @@ public class Shop
 
 public class EmployeeRangeForBusinessSize : ValidationAttribute
 {
-    public HttpStatusCode httpStatusCode;
     public int _maxEmployees;
 
     public EmployeeRangeForBusinessSize(int maxEmployees)
@@ -44,10 +45,10 @@ public class EmployeeRangeForBusinessSize : ValidationAttribute
 public class ShopController : ControllerBase
 {
     static List<Shop> shops = new List<Shop>{
-        new Shop {ShopName = "Kardesler Bakkal", ShopAddress = "Izmir/Buca", NumberOfEmployees = 3 },
-        new Shop {ShopName = "Meydan Tekel",ShopAddress = "Izmir/Buca",NumberOfEmployees = 2 },
-        new Shop {ShopName = "Ucarlar Market",ShopAddress = "Izmir/Karsiyaka",NumberOfEmployees = 4 },
-        new Shop {ShopName = "Tuylu Petshop",ShopAddress = "Afyonkarahisar/Bolvadin",NumberOfEmployees = 3 }
+        new Shop {ID = "1" ,ShopName = "Kardesler Bakkal", ShopAddress = "Izmir/Buca", NumberOfEmployees = 3 },
+        new Shop {ID = "2" ,ShopName = "Meydan Tekel",ShopAddress = "Izmir/Buca",NumberOfEmployees = 2 },
+        new Shop {ID = "3" ,ShopName = "Ucarlar Market",ShopAddress = "Izmir/Karsiyaka",NumberOfEmployees = 4 },
+        new Shop {ID = "4" ,ShopName = "Tuylu Petshop",ShopAddress = "Afyonkarahisar/Bolvadin",NumberOfEmployees = 3 }
     };
 
     public ShopController()
@@ -83,7 +84,7 @@ public class ShopController : ControllerBase
             var result = shops.FirstOrDefault(p => p.ShopName == name);
             if (result != null)
             {
-                return Ok(shops.FirstOrDefault(p => p.ShopName == name));
+                return Ok(result);
             }
             else
             {
@@ -113,4 +114,74 @@ public class ShopController : ControllerBase
     {
         return shops.FirstOrDefault(p => p.ShopAddress == shopAddress & p.NumberOfEmployees == numberOfEmployees);
     }
+
+    [HttpPatch("{id}")]
+    public IActionResult UpdateShopName(string id, string name)
+    {
+        try
+        {
+            var result = shops.FirstOrDefault(p => p.ID == id);
+            if (result != null)
+            {
+                result.ShopName = name;
+                return Ok($"Shop updated: Id = {result.ID} Name = {result.ShopName}");
+            }
+            else
+            {
+                return NotFound("No shop found with this id!");
+            }
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred: {ex.Message}");
+        }
+
+    }
+
+    [HttpPut("{id}")]
+    public IActionResult UpdateShop(string id, string name, int numberOfEmployees)
+    {
+        try
+        {
+            var result = shops.FirstOrDefault(p => p.ID == id);
+            if (result != null)
+            {
+                result.ShopName = name;
+                result.NumberOfEmployees = numberOfEmployees;
+                return Ok($"Shop updated: Id = {result.ID} Name = {result.ShopName}");
+            }
+            else
+            {
+                return NotFound("No shop found with this id!");
+            }
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred: {ex.Message}");
+        }
+
+    }
+
+    [HttpDelete("{id}")]
+    public IActionResult DeleteShop([FromRoute] string id)
+    {
+        try
+        {
+            var result = shops.FirstOrDefault(p => p.ID == id);
+            if (result != null)
+            {
+                shops.Remove(result);
+                return Ok($"Market with this ID '{result.ID}' has been deleted!");
+            }
+            else
+            {
+                return NotFound("No shop found with this id!");
+            }
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"An error occurred: {ex.Message}");
+        }
+    }
+
 }
